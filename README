@@ -4,7 +4,7 @@ This package contains the cPanel API Call Tracer, which is used to trace cPanel'
 
 This allows you to view the input and output from every API call used within the cPanel interface.  This module should NEVER be used on a production server for more than a few seconds as all passwords used in the APIs are passed to it and logged to a file.  Furthermore, it create a possible race condition where two users can attempt to write to the same file, causing the cPanel interface to crash.
 
-To disable it, after it's use, simply move /usr/local/cpanel/Cpanel/CustomEventHandler.pm to another filename and delete /dev/shm/apiout.tmp
+To disable it, after it's use, simply move /usr/local/cpanel/Cpanel/CustomEventHandler.pm to another filename.
 
 Version 1.0
 
@@ -15,7 +15,7 @@ Copy CustomEvenyHandler.pm to /usr/local/cpanel/Cpanel, if you have a previous e
 
 USAGE
 -----
-This will output all information relevant to an API call in Data::Dumper format to the error_log.  /dev/shm is used for temporary storage of this data.
+This will output all information relevant to an API call in Data::Dumper format to the error_log.
 
 Please consult the Data::Dumper documentation on CPAN for information on what the various symbols used in the output mean.
 
