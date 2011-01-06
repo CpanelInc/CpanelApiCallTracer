@@ -3,16 +3,18 @@
 
 ##
 # IMPORTANT NOTE:
-# This is a modified version of Data::Dumper that should only be used on cPanel systems
+# This is a modified version of Data::Dumper v2.12 that should only be used on cPanel systems.
+# More Specifically, this is a version of Data::Dumper that has been modified to run in PurePerl mode only.  
+#
+# It's use outside of very specific scenarios is limited, if you are needing to use Data::Dumper in a standard perl environment, you should probably refer to:
+# http://search.cpan.org/~smueller/Data-Dumper-2.128/Dumper.pm
+#
+# This program is free software; you can redistribute it and/or modify it under the same terms as Data::Dumper v2.12 itself. (Artistic Perl License)
 ##
+
 #
 # INSTALLATION:
 # drop into /usr/local/cpanel/perl/Data/
-#
-
-#
-# convert perl data structures into perl syntax suitable for both printing
-# and eval
 #
 # Documentation at the __END__
 #
