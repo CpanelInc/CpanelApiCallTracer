@@ -1,0 +1,14 @@
+Custom Event Handler Dumper
+
+Version 1.0
+
+INSTALL
+-------
+Copy Dumper.pm to /usr/local/cpanel/perl/Data
+Copy CustomEvenyHandler.pm to /usr/local/cpanel/Cpanel, if you have a previous existing CustomEventHandler in place, you will need to move it out of the way in order to use this module
+
+USAGE
+-----
+The purpose of this module is to dump all information passed to Cpanel::CustomEventHandler::event() to the error_log.  It will output all the variables in the normal dumper format plus a little more information.  /dev/shm should be available on any system running this as this is used to log API1 calls.
+
+This module should NEVER be used on a production server as all passwords used in the APIs are passed to it.

@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use File::Copy			();
+
+if ( !-e '/usr/local/cpanel' ) {
+	die "This is only intended for use with cPanel & WHM servers";
+}
+
+if ( -e '/usr/local/cpanel/Cpanel/CustomEventHandler.pm' ) {
+	die 'A CustomEventHandler already exists, aborting installation';
+}
+
+File::Copy::copy("Dumper.pm", "/usr/local/cpanel/perl/Data/Dumper.pm");
+File::Copy::copy("CustomEventHandler.pm", "/usr/local/cpanel/Cpanel/CustomEventHandler.pm");
+
+if ( $! ) {
+	print "An error occurred during installation: $!\n";
+}
+else {
+	print "Installation Successful, please run:\n";
+	print "\ttail -f /usr/local/cpanel/logs/error_log\n\n";
+	print "and login to the cPanel interface";
+}
