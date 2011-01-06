@@ -22,5 +22,5 @@ if ( $! ) {
 else {
 	print "Installation Successful, please run:\n";
 	print "\ttail -f /usr/local/cpanel/logs/error_log\n\n";
-	print "and login to the cPanel interface";
+	print "and login to the cPanel interface\n";
 }
