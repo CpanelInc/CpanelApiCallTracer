@@ -23,60 +23,59 @@ package Cpanel::CustomEventHandler;
 # POSSIBILITY OF SUCH DAMAGE.
 
 use strict;
-use Cpanel::Logger ();
+use Cpanel::Logger      ();
+use Cpanel::InMemoryFH  ();
 use Data::Dumper;
 
-# this version of CustomEventHandler.pm will throw debug output for API calls into /usr/local/cpanel/logs/error_log
-# Also required is the modified version of Data::Dumper available in this directory, please see it's headers for installation
-# It can be adjusted to ONLY show certain calls by adjusting the commented out line #33
-
-my $out_file = '/dev/shm/apiout.tmp';
+# this version of CustomEventHandler.pm will print Parameters and Response from API calls into /usr/local/cpanel/logs/error_log
+# Also required is the modified version of Data::Dumper available in this directory, please see the README file for notes and information
+# This utility can be adjusted to ONLY show certain calls by adjusting the commented out line #49
 
 sub event {
     my ( $apiv, $type, $module, $event, $cfgref, $dataref ) = @_;
-
-    # Essential!! removing this line will cause UI glitches in the cPanel interface
-    my @ignore = (
-        'branding', 'getcharset',    'printvar',   'langprint',
-        'ui',       'magicrevision', 'relinclude', 'relrawinclude'
-    );
+    # The line below is a filter line that should be uncommented & modified if you are trying to debug
+    # a specific API call
+    # return 1 if $module ne "email" || $event ne "addpop";
+    
+    
+    # the @ignore array contains modules that are called frequently and can slow down the cPanel UI to a point where it is nearly unusable
+    # If you need to debug one of these modules, simply remove it from the below hash.
+    my @ignore = ( 'branding', 'getcharset', 'printvar', 'langprint', 'ui', 'magicrevision', 'relinclude', 'relrawinclude' );
     return 1 if grep( /$module/, @ignore ) && $apiv eq '1';
-    return 1 if $module eq 'branding';
 
-    ###
-    # Filter Line, If you are looking for a specific call, uncommment and modify this
-    ###
 
-    #	return 1 if $module ne "email" || $event ne "addpop";
 
-    print STDERR "$module:$event\n";
-    print STDERR '$apiv = ' . $apiv . "\n";
-    print STDERR '$type = ' . $type . "\n";
-    print STDERR "-----\n\$cfgref\n\n" . Dumper($cfgref) . "\n";
-
-    if ( $apiv eq '1' ) {
-        if ( $type eq 'pre' ) {
-            print STDERR $module . ':' . $event . " ";
-            open( APIHANDLE, ">", $out_file );
+    if ( $type eq 'pre' && $apiv eq '1' ) {
+        $Cpanel::api1_traced = 0;
+        if ( tie *APIHANDLE, 'Cpanel::InMemoryFH' ) {
+            $Cpanel::api1_traced = 1;
             select(APIHANDLE);
         }
-        if ( $type eq 'post' ) {
-            select(STDOUT);
-            close(APIHANDLE);
-            open( my $apihandle, "<", $outfile );
-            print STDERR "-----\noutput\n\n";
-            while ( my $line = readline($apihandle) ) {
-                print STDOUT $line;
-                print STDERR $line . "\n\n";
-            }
-            close( $apihandle );
-            unlink $out_file;
+        else {
+            print STDERR "could not trap STDOUT\n";
         }
     }
-    elsif ( $apiv eq '2' && $type eq 'post' ) {
-        print STDERR "-----\n\$dataref\n\n" . Dumper($dataref);
+    elsif ( $type eq 'post' ) {
+        print STDERR "$module:$event\n\n";
+        print STDERR 'API:' . $apiv . "\n";
+        print STDERR "Parameters:\n\n" . Dumper($cfgref) . "\n";
+        
+        # output return data
+        if ( $apiv eq '1') {
+            my $result;
+            read(APIHANDLE, $result, 16777216 ) || print STDERR "failed to read from APIHANDLE:\n";
+            select(STDOUT);
+            print STDERR "Return:\n\n";
+            print STDOUT $result;
+            print STDERR $result . "\n\n";
+            untie *APIHANDLE;
+        }
+        elsif ( $apiv eq '2' ) {
+            print STDERR "Return:\n\n" . Dumper($dataref)
+        }
+        
+        print STDERR "\n--------------------\n";
     }
-    print STDERR "\n--------------------\n";
     return 1;
 }
 

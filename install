@@ -3,24 +3,36 @@
 use strict;
 use warnings;
 
-use File::Copy			();
+use File::Copy ();
 
-if ( !-e '/usr/local/cpanel' ) {
-	die "This is only intended for use with cPanel & WHM servers";
+if ( open ( my $version_fh, '<', '/usr/local/cpanel/version' ) ) {
+    my $version
+    read($version_fh, $version, 32);
+    close ($version_fh);
+    $version =~ s/^(\d\.\d).+/$1/;
+    if ( $version <  11.28 ) {
+        die "This version of the cPanel API Call tracer requires cpanel 11.28.x or greater";
+    }
+}
+else {
+    die "This is only intended for use with cPanel & WHM servers";
 }
 
 if ( -e '/usr/local/cpanel/Cpanel/CustomEventHandler.pm' ) {
 	die 'A CustomEventHandler already exists, aborting installation';
 }
 
+
 File::Copy::copy("Dumper.pm", "/usr/local/cpanel/perl/Data/Dumper.pm");
 File::Copy::copy("CustomEventHandler.pm", "/usr/local/cpanel/Cpanel/CustomEventHandler.pm");
 
 if ( $! ) {
-	print "An error occurred during installation: $!\n";
+	print "An error occurred during installation:\n$!\n";
 }
 else {
 	print "Installation Successful, please run:\n";
 	print "\ttail -f /usr/local/cpanel/logs/error_log\n\n";
-	print "and login to the cPanel interface\n";
+	print "and login to the cPanel interface\n\n";
+	print "IMPORTANT: This should never be left installed on a server, to uninstall:\n";
+	print "rm /usr/local/cpanel/Cpanel/CustomEventHandler.pm\n";
 }
