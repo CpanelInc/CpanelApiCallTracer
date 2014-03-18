@@ -6,7 +6,7 @@ use warnings;
 use File::Copy ();
 
 if ( open ( my $version_fh, '<', '/usr/local/cpanel/version' ) ) {
-    my $version
+    my $version;
     read($version_fh, $version, 32);
     close ($version_fh);
     $version =~ s/^(\d\.\d).+/$1/;
